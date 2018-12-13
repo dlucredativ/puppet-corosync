@@ -278,6 +278,11 @@
 #   Default (Debian >= 8):        true
 #   Default (otherwise):          false
 #
+# [*watchdog_device*]
+#   Watchdog device to use, for example '/dev/watchdog' or 'off'.
+#   Its presence (or lack thereof) shifted with corosync versions.
+#   Default: undef
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -348,6 +353,7 @@ class corosync(
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
+  Optional[String] $watchdog_device                                  = undef,
 ) inherits ::corosync::params {
 
   if $set_votequorum and empty($quorum_members) {
