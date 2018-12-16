@@ -30,6 +30,15 @@ RSpec.configure do |c|
         on host, 'echo deb http://ftp.debian.org/debian jessie-backports main >> /etc/apt/sources.list'
         on host, 'apt-get update && apt-get install -y openhpid', acceptable_exit_codes: [0, 1, 100]
       end
+      # Issue 455: There are recurring problems with the pacemaker systemd service
+      # refusing to stop its crmd subprocess leading to test timeouts. Force a fast
+      # SigKill here.
+      def override_timeout_on(host)
+        on host, 'mkdir /etc/systemd/system/pacemaker.service.d'
+        on host, 'echo -e "[Service]\nSendSIGKILL=yes\nTimeoutStopSec=240s" > /etc/systemd/system/pacemaker.service.d/10-timeout.conf'
+      end
+      override_timeout_on(host) if fact('os.family') == 'Debian' && ['9', '16.04'].include?(fact('os.release.major'))
+      override_timeout_on(host) if fact('os.family') == 'RedHat' && fact('os.release.major') == '7'
     end
   end
 end
